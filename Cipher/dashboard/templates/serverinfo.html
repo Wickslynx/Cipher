@@ -1,0 +1,49 @@
+
+<!DOCTYPE html>
+<html data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <title>Server Info</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+    }
+    header {
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    main {
+      max-width: 768px;
+      margin: auto;
+    }
+    pre {
+      background: var(--muted-border-color);
+      padding: 1rem;
+      border-radius: 0.5rem;
+    }
+  </style>
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+    }
+  </script>
+</head>
+<body>
+<main class="container">
+  <header>
+    <h1>📡 Server Info</h1>
+    <button onclick="toggleTheme()">🌓 Theme</button>
+  </header>
+  <article>
+    <p>This page will soon display live server metrics and stats.</p>
+    <a href="/" role="button" class="secondary">← Back Home</a>
+  </article>
+</main>
+</body>
+</html>

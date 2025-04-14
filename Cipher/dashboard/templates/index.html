@@ -1,0 +1,67 @@
+
+<!DOCTYPE html>
+<html data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <title>Cipher Bot Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+    }
+    header {
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    .hero {
+      background: var(--primary);
+      color: white;
+      padding: 2rem;
+      border-radius: 0.5rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+    }
+  </script>
+</head>
+<body>
+<main class="container">
+  <header>
+    <h1>🤖 Cipher Dashboard</h1>
+    <button onclick="toggleTheme()">🌓 Toggle</button>
+  </header>
+
+  {% if user %}
+    <div class="hero">
+      <h2>Welcome, {{ user.username }}#{{ user.discriminator }}</h2>
+      <p>Access all your bot's tools and insights below.</p>
+    </div>
+    <div class="card-grid">
+      <a href="/tickets" role="button" class="contrast">🎫 Ticket System</a>
+      <a href="/serverinfo" role="button">📡 Server Info</a>
+      <a href="/logout" role="button" class="secondary">Logout</a>
+    </div>
+  {% else %}
+    <article>
+      <h2>Welcome to Cipher</h2>
+      <p>A sleek dashboard for your Discord bot.</p>
+      <a href="/login" role="button">🔐 Login with Discord</a>
+    </article>
+  {% endif %}
+</main>
+</body>
+</html>

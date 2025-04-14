@@ -1,0 +1,94 @@
+
+<!DOCTYPE html>
+<html data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <title>Tickets Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      padding-bottom: 5rem;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+    .section {
+      margin-bottom: 3rem;
+    }
+    .config-block {
+      background: var(--muted-border-color);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+    }
+    summary {
+      cursor: pointer;
+    }
+    details {
+      border-left: 3px solid var(--primary);
+      padding-left: 1rem;
+      margin-bottom: 1rem;
+    }
+  </style>
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+    }
+  </script>
+</head>
+<body>
+<main class="container">
+  <header>
+    <h1>🎫 Cipher Tickets</h1>
+    <nav>
+      <button onclick="toggleTheme()">🌓 Toggle Theme</button>
+    </nav>
+  </header>
+
+  {% if user %}
+    <p>Welcome, <strong>{{ user.username }}#{{ user.discriminator }}</strong></p>
+  {% endif %}
+
+  <section class="section">
+    <h2>📊 Ticket Stats</h2>
+    <div class="grid">
+      {% for type, count in counts.items() %}
+        <article>
+          <header><strong>{{ type|capitalize }}</strong></header>
+          <p>{{ count }} tickets</p>
+        </article>
+      {% endfor %}
+    </div>
+    <a href="/tickets/export" role="button" class="secondary">⬇️ Export Logs to CSV</a>
+  </section>
+
+  <section class="section">
+    <h2>⚙️ Ticket Configuration</h2>
+    <div class="config-block">
+      <pre>{{ config | tojson(indent=2) }}</pre>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>🧾 Ticket Activity</h2>
+    {% if logs %}
+      {% for log in logs %}
+        <details>
+          <summary><strong>{{ log.timestamp }}</strong> — {{ log.user }} ({{ log.type }})</summary>
+          <pre>{{ log | tojson(indent=2) }}</pre>
+        </details>
+      {% endfor %}
+    {% else %}
+      <p>No ticket activity logged yet.</p>
+    {% endif %}
+  </section>
+</main>
+</body>
+</html>
