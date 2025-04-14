@@ -1,29 +1,149 @@
-
 <!DOCTYPE html>
 <html data-theme="light">
 <head>
   <meta charset="UTF-8">
-  <title>Server Info</title>
+  <title>Server Info - Cipher Bot</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
+    :root {
+      --primary-color: #7289DA;
+      --primary-hover: #5f73bc;
+      --secondary-color: #2C2F33;
+      --accent-color: #99AAB5;
+      --text-color: #2e3338;
     }
+    
+    body {
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      line-height: 1.6;
+    }
+    
     header {
       margin-bottom: 2rem;
+      padding: 1rem 0;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      border-bottom: 1px solid var(--muted-border-color);
     }
+    
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .breadcrumb a {
+      color: var(--primary-color);
+      text-decoration: none;
+    }
+    
+    .breadcrumb i {
+      font-size: 0.8rem;
+      color: var(--accent-color);
+    }
+    
     main {
-      max-width: 768px;
+      max-width: 900px;
       margin: auto;
     }
+    
+    .server-info-card {
+      background-color: var(--card-background-color, white);
+      border-radius: 0.75rem;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      border: 1px solid var(--muted-border-color);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    
+    .server-info-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .server-info-header i {
+      font-size: 2rem;
+      color: var(--primary-color);
+    }
+    
+    .server-info-header h2 {
+      margin: 0;
+    }
+    
     pre {
-      background: var(--muted-border-color);
-      padding: 1rem;
+      background: var(--secondary-color);
+      color: #f8f9fa;
+      padding: 1.5rem;
       border-radius: 0.5rem;
+      overflow-x: auto;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 0.9rem;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+    
+    .stat-card {
+      background-color: var(--card-background-color, white);
+      border: 1px solid var(--muted-border-color);
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin: 0.5rem 0;
+    }
+    
+    .stat-label {
+      font-size: 0.9rem;
+      color: var(--accent-color);
+    }
+    
+    .theme-toggle {
+      background: none;
+      border: 1px solid var(--muted-border-color);
+      width: auto;
+      padding: 0.3rem 0.8rem;
+      border-radius: 2rem;
+      font-size: 0.9rem;
+      margin: 0;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .theme-toggle:hover {
+      background-color: var(--muted-border-color);
+    }
+    
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    
+    [data-theme="dark"] {
+      --card-background-color: #2C2F33;
     }
   </style>
   <script>
@@ -37,13 +157,54 @@
 <body>
 <main class="container">
   <header>
-    <h1>📡 Server Info</h1>
-    <button onclick="toggleTheme()">🌓 Theme</button>
+    <h1><i class="fas fa-server"></i> Server Info</h1>
+    <button onclick="toggleTheme()" class="theme-toggle">
+      <i class="fas fa-moon"></i> Theme
+    </button>
   </header>
-  <article>
-    <p>This page will soon display live server metrics and stats.</p>
-    <a href="/" role="button" class="secondary">← Back Home</a>
-  </article>
+  
+  <div class="breadcrumb">
+    <a href="/"><i class="fas fa-home"></i> Dashboard</a>
+    <i class="fas fa-chevron-right"></i>
+    <span>Server Info</span>
+  </div>
+  
+  <div class="server-info-card">
+    <div class="server-info-header">
+      <i class="fas fa-chart-line"></i>
+      <h2>Server Performance</h2>
+    </div>
+    
+    <div class="stats-grid">
+      <div class="stat-card">
+        <i class="fas fa-microchip"></i>
+        <div class="stat-value">12%</div>
+        <div class="stat-label">CPU Usage</div>
+      </div>
+      <div class="stat-card">
+        <i class="fas fa-memory"></i>
+        <div class="stat-value">324MB</div>
+        <div class="stat-label">Memory Usage</div>
+      </div>
+      <div class="stat-card">
+        <i class="fas fa-clock"></i>
+        <div class="stat-value">99.8%</div>
+        <div class="stat-label">Uptime</div>
+      </div>
+    </div>
+    
+    <p>This dashboard will soon display more detailed server metrics and analytics. Check back soon for updates!</p>
+    
+    <pre>{
+  "status": "operational",
+  "version": "1.2.3",
+  "lastRestart": "2025-04-10T15:23:45Z"
+}</pre>
+  </div>
+  
+  <a href="/" role="button" class="secondary back-btn">
+    <i class="fas fa-arrow-left"></i> Back to Dashboard
+  </a>
 </main>
 </body>
 </html>
