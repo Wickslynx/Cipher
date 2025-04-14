@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <title>Cipher Bot Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #7289DA;
+      --primary-hover: #5f73bc;
+      --secondary-color: #2C2F33;
+      --accent-color: #99AAB5;
+      --text-color: #2e3338;
+      --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    body {
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      line-height: 1.6;
+      background-color: var(--background-color, #f9f9f9);
+    }
+    
+    header {
+      margin-bottom: 2rem;
+      padding: 1rem 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--muted-border-color);
+    }
+    
+    header h1 {
+      margin: 0;
+      display: flex;
+      align-items: center;
+      font-weight: 700;
+      color: var(--primary-color);
+    }
+    
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .theme-toggle {
+      background: none;
+      border: 1px solid var(--muted-border-color);
+      width: auto;
+      padding: 0.3rem 0.8rem;
+      border-radius: 2rem;
+      font-size: 0.9rem;
+      margin: 0;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .theme-toggle:hover {
+      background-color: var(--muted-border-color);
+    }
+    
+    .hero {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+      color: white;
+      padding: 2.5rem;
+      border-radius: 0.75rem;
+      margin-bottom: 2.5rem;
+      box-shadow: var(--card-shadow);
+    }
+    
+    .hero h2 {
+      margin-top: 0;
+    }
+    
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    
+    .card-grid a {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem 1rem;
+      border-radius: 0.75rem;
+      transition: all 0.3s ease;
+      border: 1px solid var(--muted-border-color);
+      background-color: var(--card-background-color, white);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    
+    .card-grid a:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card-grid a i {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: var(--primary-color);
+    }
+    
+    .welcome-article {
+      text-align: center;
+      padding: 3rem 1rem;
+      max-width: 600px;
+      margin: 2rem auto;
+      background-color: var(--card-background-color, white);
+      border-radius: 1rem;
+      box-shadow: var(--card-shadow);
+    }
+    
+    .welcome-article h2 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: var(--primary-color);
+    }
+    
+    .login-btn {
+      margin-top: 1.5rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 2rem;
+      font-weight: 600;
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .login-btn:hover {
+      background-color: var(--primary-hover);
+      border-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin: 3rem 0;
+    }
+    
+    .feature-card {
+      background-color: var(--card-background-color, white);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      text-align: center;
+      box-shadow: var(--card-shadow);
+    }
+    
+    .feature-card i {
+      font-size: 2.5rem;
+      color: var(--primary-color);
+      mgin-bottom: 1rem;
+    }
+    
+    .feature-card h3 {
+      color: var(--text-color);
+      margin-bottom: 0.5rem;
+    }
+    
+    .user-welcome {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    .user-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    
+    .server-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      text-align: center;
+      background-color: var(--card-background-color, white);
+      border-radius: 0.75rem;
+      box-shadow: var(--card-shadow);
+      transition: all 0.3s ease;
+    }
+    
+    .server-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    }
+    
+    .server-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      margin-bottom: 1rem;
+      object-fit: cover;
+      background-color: #5865F2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.5rem;
+    }
+    
+    [data-theme="dark"] {
+      --card-background-color: #2C2F33;
+      --background-color: #23272A;
+    }
+  </style>
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+    }
+  </script>
+</head>
+<body>
+<main class="container">
+  <header>
+    <h1>
+      <span class="logo">
+        <img src="/static/cipher.png" alt="Cipher Logo" style="height: 2rem; border-radius: 0.3rem;"> Cipher Dashboard
+      </span>
+    </h1>
+    <button onclick="toggleTheme()" class="theme-toggle">
+      <i class="fas fa-moon"></i> Toggle Theme
+    </button>
+  </header>
+  
+  {% if user %}
+    
+    <div class="hero">
+      <div class="user-welcome">
+        <img src="https://cdn.discordapp.com/avatars/{{ user.id }}/{{ user.avatar }}.png" 
+             alt="{{ user.username }}" class="user-avatar"
+             onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
+        <div>
+          <h2>Welcome, {{ user.username }}{% if user.discriminator != '0' %}#{{ user.discriminator }}{% endif %}</h2>
+          <p>Access all your bot's tools and insights below.</p>
+        </div>
+      </div>
+    </div>
+    
+    {% if guilds %}
+      <h3><i class="fas fa-server"></i> Your Servers</h3>
+      <div class="card-grid">
+        {% for guild in guilds %}
+          <a href="/serverinfo?guild_id={{ guild.id }}" class="server-card">
+            {% if guild.icon %}
+              <img src="https://cdn.discordapp.com/icons/{{ guild.id }}/{{ guild.icon }}.png" 
+                  alt="{{ guild.name }}" class="server-icon">
+            {% else %}
+              <div class="server-icon">
+                <i class="fas fa-server"></i>
+              </div>
+            {% endif %}
+            <h4>{{ guild.name }}</h4>
+          </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div role="alert" style="background-color: #d1ecf1; color: #0c5460; padding: 1rem; border-radius: 0.5rem;">
+        <i class="fas fa-info-circle"></i> You don't have any servers with Cipher Bot yet. 
+        <a href="https://discord.com/api/oauth2/authorize?client_id={{ request.app.state.bot.user.id }}&permissions=8&scope=bot%20applications.commands" target="_blank">
+          Invite the bot to your server
+        </a>
+      </div>
+    {% endif %}
+    
+    <h3><i class="fas fa-tools"></i> Tools & Features</h3>
+    <div class="card-grid">
+      <a href="/tickets" role="button" class="contrast">
+        <i class="fas fa-ticket-alt"></i>
+        <span>Ticket System</span>
+        <small>Manage support tickets</small>
+      </a>
+      <a href="/commands" role="button">
+        <i class="fas fa-terminal"></i>
+        <span>Commands</span>
+        <small>View all bot commands</small>
+      </a>
+      <a href="/dashboard" role="button">
+        <i class="fas fa-chart-line"></i>
+        <span>Analytics</span>
+        <small>View server insights</small>
+      </a>
+      <a href="/logout" role="button" class="secondary">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Logout</span>
+        <small>End your session</small>
+      </a>
+    </div>
+  {% else %}
+    <article class="welcome-article">
+      <i class="fas fa-robot" style="font-size: 4rem; color: var(--primary-color);"></i>
+      <h2>Welcome to Cipher</h2>
+      <p>A sleek dashboard for your Discord bot with powerful management tools and analytics.</p>
+    <a href="/login" role="button" class="login-btn">
+        <i class="fab fa-discord"></i> Login with Discord
+      </a>
+    </article>
+    
+    <div class="features">
+      <div class="feature-card">
+        <i class="fas fa-server"></i>
+        <h3>Server Management</h3>
+        <p>Manage all your Discord servers from a single dashboard interface.</p>
+      </div>
+      <div class="feature-card">
+        <i class="fas fa-ticket-alt"></i>
+        <h3>Ticket System</h3>
+        <p>Create and manage support tickets to better assist your community members.</p>
+      </div>
+      <div class="feature-card">
+        <i class="fas fa-shield-alt"></i>
+        <h3>Moderation Tools</h3>
+        <p>Keep your server safe with powerful moderation tools and customizable auto-mod settings.</p>
+      </div>
+    </div>
+    
+    <div style="text-align: center; margin: 3rem 0; padding: 2rem; border-radius: 0.75rem; background-color: var(--card-background-color, white); box-shadow: var(--card-shadow);">
+      <h3>Ready to enhance your Discord experience?</h3>
+      <p>Login with your Discord account to access all features or invite Cipher Bot to your server.</p>
+      <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem; flex-wrap: wrap;">
+        <a href="/login" role="button" class="login-btn">
+          <i class="fab fa-discord"></i> Login with Discord
+        </a>
+        <a href="https://discord.com/api/oauth2/authorize?client_id=1361017411746136145&permissions=8&scope=bot%20applications.commands" 
+           role="button" class="contrast" target="_blank">
+          <i class="fas fa-plus-circle"></i> Add to Server
+        </a>
+      </div>
+    </div>
+  {% endif %}
+</main>
+
+<footer style="text-align: center; padding: 2rem 0; margin-top: 3rem; border-top: 1px solid var(--muted-border-color);">
+  <div class="container">
+    <p>&copy; 2025 Cipher Bot. All rights reserved.</p>
+    <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1rem;">
+      <a href="#" aria-label="GitHub" style="color: var(--primary-color);"><i class="fab fa-github"></i></a>
+      <a href="#" aria-label="Discord" style="color: var(--primary-color);"><i class="fab fa-discord"></i></a>
+      <a href="#" aria-label="Twitter" style="color: var(--primary-color);"><i class="fab fa-twitter"></i></a>
+    </div>
+  </div>
+</footer>
+</body>
+</html>
+
