@@ -1,38 +1,275 @@
-
 <!DOCTYPE html>
 <html data-theme="light">
 <head>
   <meta charset="UTF-8">
-  <title>Tickets Dashboard</title>
+  <title>Tickets Dashboard - Cipher Bot</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      padding-bottom: 5rem;
+    :root {
+      --primary-color: #7289DA;
+      --primary-hover: #5f73bc;
+      --secondary-color: #2C2F33;
+      --accent-color: #99AAB5;
+      --text-color: #2e3338;
+      --success-color: #43B581;
+      --warning-color: #FAA61A;
+      --danger-color: #F04747;
     }
+    
+    body {
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      line-height: 1.6;
+      padding-bottom: 5rem;
+      color: var(--text-color);
+    }
+    
     header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 2rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--muted-border-color);
     }
+    
+    header h1 {
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .breadcrumb a {
+      color: var(--primary-color);
+      text-decoration: none;
+    }
+    
+    .breadcrumb i {
+      font-size: 0.8rem;
+      color: var(--accent-color);
+    }
+    
     .section {
       margin-bottom: 3rem;
+      background-color: var(--card-background-color, white);
+      border-radius: 0.75rem;
+      padding: 2rem;
+      border: 1px solid var(--muted-border-color);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     }
+    
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--muted-border-color);
+    }
+    
+    .section-header i {
+      font-size: 1.5rem;
+      color: var(--primary-color);
+    }
+    
+    .section-header h2 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+    
     .config-block {
-      background: var(--muted-border-color);
-      padding: 1rem;
+      background: var(--secondary-color);
+      color: #f8f9fa;
+      padding: 1.5rem;
       border-radius: 0.5rem;
       overflow-x: auto;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 0.9rem;
     }
+    
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    
+    .stat-card {
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      text-align: center;
+      transition: all 0.2s ease;
+      background: linear-gradient(135deg, var(--card-bg-start, #f8f9fa), var(--card-bg-end, #e9ecef));
+      border: 1px solid var(--muted-border-color);
+    }
+    
+    .stat-card.open {
+      --card-bg-start: #a8d5ff;
+      --card-bg-end: #d4e9ff;
+    }
+    
+    .stat-card.closed {
+      --card-bg-start: #c8e6c9;
+      --card-bg-end: #e8f5e9;
+    }
+    
+    .stat-card.pending {
+      --card-bg-start: #fff0c8;
+      --card-bg-end: #fff8e1;
+    }
+    
+    .stat-card.total {
+      --card-bg-start: #d1c4e9;
+      --card-bg-end: #ede7f6;
+    }
+    
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin: 0.5rem 0;
+    }
+    
+    .stat-label {
+      font-size: 1rem;
+      font-weight: 500;
+    }
+    
+    details {
+      border-left: 3px solid var(--primary-color);
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
+      background-color: var(--detail-bg, rgba(114, 137, 218, 0.1));
+      border-radius: 0 0.5rem 0.5rem 0;
+      transition: all 0.2s ease;
+    }
+    
+    details:hover {
+      background-color: var(--detail-bg-hover, rgba(114, 137, 218, 0.2));
+    }
+    
+    details[open] {
+      padding-bottom: 1rem;
+    }
+    
     summary {
       cursor: pointer;
+      font-weight: 500;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    details {
-      border-left: 3px solid var(--primary);
-      padding-left: 1rem;
-      margin-bottom: 1rem;
+    
+    summary .badge {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 2rem;
+      background-color: var(--badge-bg, var(--primary-color));
+      color: white;
+    }
+    
+    .badge.open {
+      --badge-bg: var(--primary-color);
+    }
+    
+    .badge.closed {
+      --badge-bg: var(--success-color);
+    }
+    
+    .badge.pending {
+      --badge-bg: var(--warning-color);
+    }
+    
+    pre {
+      background: var(--secondary-color);
+      color: #f8f9fa;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-top: 1rem;
+      font-size: 0.85rem;
+    }
+    
+    .actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+    
+    .actions a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      width: auto;
+      padding: 0.5rem 1rem;
+    }
+    
+    .theme-toggle {
+      background: none;
+      border: 1px solid var(--muted-border-color);
+      width: auto;
+      padding: 0.3rem 0.8rem;
+      border-radius: 2rem;
+      font-size: 0.9rem;
+      margin: 0;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .theme-toggle:hover {
+      background-color: var(--muted-border-color);
+    }
+    
+    .user-welcome {
+      margin-bottom: 2rem;
+      padding: 1rem;
+      background-color: rgba(114, 137, 218, 0.1);
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .user-welcome i {
+      font-size: 1.5rem;
+      color: var(--primary-color);
+    }
+    
+    [data-theme="dark"] {
+      --card-background-color: #2C2F33;
+      --detail-bg: rgba(114, 137, 218, 0.2);
+      --detail-bg-hover: rgba(114, 137, 218, 0.3);
+    }
+    
+    [data-theme="dark"] .stat-card {
+      color: #fff;
+    }
+    
+    [data-theme="dark"] .stat-card.open {
+      --card-bg-start: #2962ff;
+      --card-bg-end: #1565c0;
+    }
+    
+    [data-theme="dark"] .stat-card.closed {
+      --card-bg-start: #2e7d32;
+      --card-bg-end: #1b5e20;
+    }
+    
+    [data-theme="dark"] .stat-card.pending {
+      --card-bg-start: #ff8f00;
+      --card-bg-end: #ef6c00;
+    }
+    
+    [data-theme="dark"] .stat-card.total {
+      --card-bg-start: #6a1b9a;
+      --card-bg-end: #4a148c;
     }
   </style>
   <script>
@@ -46,47 +283,97 @@
 <body>
 <main class="container">
   <header>
-    <h1>🎫 Cipher Tickets</h1>
-    <nav>
-      <button onclick="toggleTheme()">🌓 Toggle Theme</button>
-    </nav>
+    <h1><i class="fas fa-ticket-alt"></i> Cipher Tickets</h1>
+    <button onclick="toggleTheme()" class="theme-toggle">
+      <i class="fas fa-moon"></i> Toggle Theme
+    </button>
   </header>
-
+  
+  <div class="breadcrumb">
+    <a href="/"><i class="fas fa-home"></i> Dashboard</a>
+    <i class="fas fa-chevron-right"></i>
+    <span>Ticket System</span>
+  </div>
+  
   {% if user %}
-    <p>Welcome, <strong>{{ user.username }}#{{ user.discriminator }}</strong></p>
-  {% endif %}
-
-  <section class="section">
-    <h2>📊 Ticket Stats</h2>
-    <div class="grid">
-      {% for type, count in counts.items() %}
-        <article>
-          <header><strong>{{ type|capitalize }}</strong></header>
-          <p>{{ count }} tickets</p>
-        </article>
-      {% endfor %}
+    <div class="user-welcome">
+      <i class="fas fa-user-circle"></i>
+      <p>Welcome, <strong>{{ user.username }}#{{ user.discriminator }}</strong></p>
     </div>
-    <a href="/tickets/export" role="button" class="secondary">⬇️ Export Logs to CSV</a>
-  </section>
-
+  {% endif %}
+  
   <section class="section">
-    <h2>⚙️ Ticket Configuration</h2>
+    <div class="section-header">
+      <i class="fas fa-chart-pie"></i>
+      <h2>Ticket Stats</h2>
+    </div>
+    
+    <div class="grid-4">
+      {% for type, count in counts.items() %}
+        <div class="stat-card {{ type|lower }}">
+          <div class="stat-label">{{ type|capitalize }}</div>
+          <div class="stat-value">{{ count }}</div>
+          <div>tickets</div>
+        </div>
+      {% endfor %}
+      <div class="stat-card total">
+        <div class="stat-label">Total</div>
+        <div class="stat-value">{{ counts.values()|sum }}</div>
+        <div>tickets</div>
+      </div>
+    </div>
+    
+    <div class="actions">
+      <a href="/tickets/export" role="button" class="secondary">
+        <i class="fas fa-file-export"></i> Export Logs to CSV
+      </a>
+      <a href="/tickets/create" role="button" class="contrast">
+        <i class="fas fa-plus-circle"></i> Create New Ticket
+      </a>
+    </div>
+  </section>
+  
+  <section class="section">
+    <div class="section-header">
+      <i class="fas fa-cog"></i>
+      <h2>Ticket Configuration</h2>
+    </div>
+    
     <div class="config-block">
       <pre>{{ config | tojson(indent=2) }}</pre>
     </div>
+    
+    <div class="actions">
+      <a href="/tickets/config/edit" role="button">
+        <i class="fas fa-edit"></i> Edit Configuration
+      </a>
+    </div>
   </section>
-
+  
   <section class="section">
-    <h2>🧾 Ticket Activity</h2>
+    <div class="section-header">
+      <i class="fas fa-history"></i>
+      <h2>Ticket Activity</h2>
+    </div>
+    
     {% if logs %}
       {% for log in logs %}
         <details>
-          <summary><strong>{{ log.timestamp }}</strong> — {{ log.user }} ({{ log.type }})</summary>
+          <summary>
+            <span>
+              <i class="fas fa-calendar-alt"></i>
+              <strong>{{ log.timestamp }}</strong> — {{ log.user }}
+            </span>
+            <span class="badge {{ log.type|lower }}">{{ log.type }}</span>
+          </summary>
           <pre>{{ log | tojson(indent=2) }}</pre>
         </details>
       {% endfor %}
     {% else %}
-      <p>No ticket activity logged yet.</p>
+      <div style="text-align: center; padding: 2rem;">
+        <i class="fas fa-inbox" style="font-size: 3rem; color: var(--accent-color); margin-bottom: 1rem;"></i>
+        <p>No ticket activity logged yet.</p>
+      </div>
     {% endif %}
   </section>
 </main>
