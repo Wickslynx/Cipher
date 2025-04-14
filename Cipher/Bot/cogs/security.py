@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from discord import app_commands
 import json
 import os
+import io
 
 SECURITY_CONFIG_FILE = 'storage/security_config.json'
 
@@ -22,7 +23,6 @@ SUSPICIOUS_ACTIONS = {
 }
 
 
-
 class SecurityCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -32,11 +32,17 @@ class SecurityCog(commands.Cog):
         self.cleanup_actions.start()
 
     def load_config(self):
+        # Ensure directory exists
+        os.makedirs(os.path.dirname(SECURITY_CONFIG_FILE), exist_ok=True)
         if os.path.exists(SECURITY_CONFIG_FILE):
-            with open(SECURITY_CONFIG_FILE, 'r') as f:
-                self.config.update(json.load(f))
+            try:
+                with open(SECURITY_CONFIG_FILE, 'r') as f:
+                    self.config.update(json.load(f))
+            except json.JSONDecodeError:
+                print("Error loading security config, using default")
 
     def save_config(self):
+        os.makedirs(os.path.dirname(SECURITY_CONFIG_FILE), exist_ok=True)
         with open(SECURITY_CONFIG_FILE, 'w') as f:
             json.dump(self.config, f, indent=4)
 
@@ -45,6 +51,9 @@ class SecurityCog(commands.Cog):
         self.action_log.setdefault(guild_id, {}).setdefault(user_id, {}).setdefault(action, []).append(now)
 
     def is_suspicious(self, guild_id, user_id, action):
+        now = datetime.utcnow().timestamp()
+        if guild_id not in self.action_log or user_id not in self.action_log[guild_id] or action not in self.action_log[guild_id][user_id]:
+            return False
         timestamps = self.action_log[guild_id][user_id][action]
         window = SUSPICIOUS_ACTIONS[action]['window']
         count = SUSPICIOUS_ACTIONS[action]['count']
@@ -52,9 +61,10 @@ class SecurityCog(commands.Cog):
         return len(recent) >= count
 
     async def alert(self, guild: discord.Guild, message: str):
-        channel = self.bot.get_channel(self.config['log_channel_id'])
-        if channel:
-            await channel.send(embed=discord.Embed(title="⚠️ Security Alert", description=message, color=discord.Color.red()))
+        if self.config['log_channel_id']:
+            channel = self.bot.get_channel(self.config['log_channel_id'])
+            if channel:
+                await channel.send(embed=discord.Embed(title="⚠️ Security Alert", description=message, color=discord.Color.red()))
         if self.config['alert_mode'] == 'dm_owner':
             try:
                 await guild.owner.send(f"[Security Alert] {message}")
@@ -63,38 +73,70 @@ class SecurityCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_ban(self, guild, user):
-        entry = (await guild.audit_logs(limit=1, action=discord.AuditLogAction.ban).flatten())[0]
-        if entry.user.id in self.config['ignored_users']: return
-        self.record_action(guild.id, entry.user.id, 'mass_ban')
-        if self.is_suspicious(guild.id, entry.user.id, 'mass_ban'):
-            await self.alert(guild, f"{entry.user} is mass banning members!")
+        try:
+            entries = await guild.audit_logs(limit=1, action=discord.AuditLogAction.ban).flatten()
+            if not entries:
+                return
+            entry = entries[0]
+            if entry.user.id in self.config['ignored_users']: 
+                return
+            self.record_action(guild.id, entry.user.id, 'mass_ban')
+            if self.is_suspicious(guild.id, entry.user.id, 'mass_ban'):
+                await self.alert(guild, f"{entry.user} is mass banning members!")
+        except Exception as e:
+            print(f"Error in on_member_ban: {e}")
 
     @commands.Cog.listener()
-    async def on_member_kick(self, member):
-        guild = member.guild
-        entry = (await guild.audit_logs(limit=1, action=discord.AuditLogAction.kick).flatten())[0]
-        if entry.user.id in self.config['ignored_users']: return
-        self.record_action(guild.id, entry.user.id, 'mass_kick')
-        if self.is_suspicious(guild.id, entry.user.id, 'mass_kick'):
-            await self.alert(guild, f"{entry.user} is mass kicking members!")
+    async def on_member_remove(self, member):
+        try:
+            guild = member.guild
+            # Check if it was a kick
+            entries = await guild.audit_logs(limit=1, action=discord.AuditLogAction.kick).flatten()
+            if not entries:
+                return
+            entry = entries[0]
+            # Check if this audit log entry is recent (within last 2 seconds)
+            if (datetime.utcnow() - entry.created_at).total_seconds() > 2:
+                return  # Not a recent action
+            if entry.user.id in self.config['ignored_users']: 
+                return
+            self.record_action(guild.id, entry.user.id, 'mass_kick')
+            if self.is_suspicious(guild.id, entry.user.id, 'mass_kick'):
+                await self.alert(guild, f"{entry.user} is mass kicking members!")
+        except Exception as e:
+            print(f"Error in on_member_remove: {e}")
 
     @commands.Cog.listener()
     async def on_guild_channel_delete(self, channel):
-        guild = channel.guild
-        entry = (await guild.audit_logs(limit=1, action=discord.AuditLogAction.channel_delete).flatten())[0]
-        if entry.user.id in self.config['ignored_users']: return
-        self.record_action(guild.id, entry.user.id, 'channel_delete')
-        if self.is_suspicious(guild.id, entry.user.id, 'channel_delete'):
-            await self.alert(guild, f"{entry.user} is deleting multiple channels!")
+        try:
+            guild = channel.guild
+            entries = await guild.audit_logs(limit=1, action=discord.AuditLogAction.channel_delete).flatten()
+            if not entries:
+                return
+            entry = entries[0]
+            if entry.user.id in self.config['ignored_users']: 
+                return
+            self.record_action(guild.id, entry.user.id, 'channel_delete')
+            if self.is_suspicious(guild.id, entry.user.id, 'channel_delete'):
+                await self.alert(guild, f"{entry.user} is deleting multiple channels!")
+        except Exception as e:
+            print(f"Error in on_guild_channel_delete: {e}")
 
     @commands.Cog.listener()
     async def on_guild_role_delete(self, role):
-        guild = role.guild
-        entry = (await guild.audit_logs(limit=1, action=discord.AuditLogAction.role_delete).flatten())[0]
-        if entry.user.id in self.config['ignored_users']: return
-        self.record_action(guild.id, entry.user.id, 'role_delete')
-        if self.is_suspicious(guild.id, entry.user.id, 'role_delete'):
-            await self.alert(guild, f"{entry.user} is deleting multiple roles!")
+        try:
+            guild = role.guild
+            entries = await guild.audit_logs(limit=1, action=discord.AuditLogAction.role_delete).flatten()
+            if not entries:
+                return
+            entry = entries[0]
+            if entry.user.id in self.config['ignored_users']: 
+                return
+            self.record_action(guild.id, entry.user.id, 'role_delete')
+            if self.is_suspicious(guild.id, entry.user.id, 'role_delete'):
+                await self.alert(guild, f"{entry.user} is deleting multiple roles!")
+        except Exception as e:
+            print(f"Error in on_guild_role_delete: {e}")
 
     @tasks.loop(minutes=1)
     async def cleanup_actions(self):
@@ -105,21 +147,30 @@ class SecurityCog(commands.Cog):
                     self.action_log[guild_id][user_id][action] = [
                         t for t in self.action_log[guild_id][user_id][action] if now - t <= 120
                     ]
+                    # Clean up empty lists
+                    if not self.action_log[guild_id][user_id][action]:
+                        del self.action_log[guild_id][user_id][action]
+                # Clean up empty user entries
+                if not self.action_log[guild_id][user_id]:
+                    del self.action_log[guild_id][user_id]
+            # Clean up empty guild entries
+            if not self.action_log[guild_id]:
+                del self.action_log[guild_id]
 
     @cleanup_actions.before_loop
     async def before_cleanup(self):
         await self.bot.wait_until_ready()
-        
-    
+
+    # Regular command group
     @commands.group(name="quarantine", invoke_without_command=True)
     @commands.has_permissions(administrator=True)
-    async def quarantine(self, ctx):
+    async def quarantine_cmd(self, ctx):
         """Security monitoring configuration commands"""
         await ctx.send("Security monitoring commands. Use `quarantine set` to configure settings.")
 
-    @quarantine.command(name="set")
+    @quarantine_cmd.command(name="set")
     @commands.has_permissions(administrator=True)
-    async def set_config(self, ctx, setting, *, value=None):
+    async def set_config_cmd(self, ctx, setting, *, value=None):
         """Configure security monitoring settings"""
         if setting == "log_channel":
             # Convert mention to ID if needed
@@ -197,9 +248,9 @@ class SecurityCog(commands.Cog):
         else:
             await ctx.send("Unknown setting. Available settings: log_channel, monitor_role, ignore_user, alert_mode")
 
-    @quarantine.command(name="status")
+    @quarantine_cmd.command(name="status")
     @commands.has_permissions(administrator=True)
-    async def show_status(self, ctx):
+    async def show_status_cmd(self, ctx):
         """Show current security monitoring configuration"""
         embed = discord.Embed(
             title="Security Monitoring Status",
@@ -256,11 +307,13 @@ class SecurityCog(commands.Cog):
         
         await ctx.send(embed=embed)
         
+    # Slash command group
     quarantine = app_commands.Group(name="quarantine", description="Security monitoring configuration commands")
 
     @quarantine.command(name="set", description="Configure security monitoring settings")
     @app_commands.describe(setting="Setting to change", value="New value for the setting")
-    async def set_config(self, interaction: discord.Interaction, setting: str, value: str = None):
+    @app_commands.checks.has_permissions(administrator=True)
+    async def set_config_slash(self, interaction: discord.Interaction, setting: str, value: str = None):
         await interaction.response.defer(ephemeral=True)
 
         guild = interaction.guild
@@ -340,7 +393,8 @@ class SecurityCog(commands.Cog):
             await interaction.followup.send("❌ Unknown setting. Available settings: `log_channel`, `monitor_role`, `ignore_user`, `alert_mode`")
 
     @quarantine.command(name="status", description="Show current security monitoring configuration")
-    async def status(self, interaction: discord.Interaction):
+    @app_commands.checks.has_permissions(administrator=True)
+    async def status_slash(self, interaction: discord.Interaction):
         guild = interaction.guild
 
         embed = discord.Embed(
@@ -394,8 +448,6 @@ class SecurityCog(commands.Cog):
         )
 
         await interaction.response.send_message(embed=embed, ephemeral=True)
-        
-        
         
     @app_commands.command(name="backup", description="Back up all roles and channels")
     @app_commands.checks.has_permissions(administrator=True)
@@ -500,7 +552,7 @@ class SecurityCog(commands.Cog):
         # Create categories first
         categories = {}
         for ch in backup_data.get("channels", []):
-            if "category" in ch["type"].lower():
+            if ch["type"] and "category" in ch["type"].lower():
                 try:
                     cat = await guild.create_category(
                         name=ch["name"],
@@ -512,22 +564,22 @@ class SecurityCog(commands.Cog):
 
         # Create channels
         for ch in backup_data.get("channels", []):
-            if "category" in ch["type"].lower():
+            if ch["type"] and "category" in ch["type"].lower():
                 continue
 
             overwrites = {}
             for role_name, perms in ch.get("overwrites", {}).items():
                 role = role_map.get(role_name)
                 if role:
-                    overwrites[role] = discord.PermissionOverwrite(
-                        allow=discord.Permissions(perms["allow"]),
-                        deny=discord.Permissions(perms["deny"])
+                    overwrites[role] = discord.PermissionOverwrite.from_pair(
+                        discord.Permissions(perms["allow"]),
+                        discord.Permissions(perms["deny"])
                     )
 
             category = categories.get(ch.get("category")) if ch.get("category") else None
 
             try:
-                if "text" in ch["type"]:
+                if ch["type"] and "text" in ch["type"].lower():
                     await guild.create_text_channel(
                         name=ch["name"],
                         topic=ch.get("topic"),
@@ -537,7 +589,7 @@ class SecurityCog(commands.Cog):
                         overwrites=overwrites,
                         category=category
                     )
-                elif "voice" in ch["type"]:
+                elif ch["type"] and "voice" in ch["type"].lower():
                     await guild.create_voice_channel(
                         name=ch["name"],
                         bitrate=ch.get("bitrate", 64000),
@@ -554,4 +606,3 @@ class SecurityCog(commands.Cog):
 
 async def setup(bot):
     await bot.add_cog(SecurityCog(bot))
-
