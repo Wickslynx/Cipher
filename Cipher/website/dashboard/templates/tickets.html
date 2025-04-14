@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <title>Ticket System - Cipher Bot Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #7289DA;
+      --primary-hover: #5f73bc;
+      --secondary-color: #2C2F33;
+      --accent-color: #99AAB5;
+      --text-color: #2e3338;
+      --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    body {
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      line-height: 1.6;
+      background-color: var(--background-color, #f9f9f9);
+    }
+    
+    header {
+      margin-bottom: 2rem;
+      padding: 1rem 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--muted-border-color);
+    }
+    
+    header h1 {
+      margin: 0;
+      display: flex;
+      align-items: center;
+      font-weight: 700;
+      color: var(--primary-color);
+    }
+    
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .theme-toggle {
+      background: none;
+      border: 1px solid var(--muted-border-color);
+      width: auto;
+      padding: 0.3rem 0.8rem;
+      border-radius: 2rem;
+      font-size: 0.9rem;
+      margin: 0;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .theme-toggle:hover {
+      background-color: var(--muted-border-color);
+    }
+    
+    .back-button {
+      margin-bottom: 1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .ticket-header {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+      color: white;
+      padding: 2rem;
+      border-radius: 0.75rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--card-shadow);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    
+    .ticket-header h2 {
+      margin: 0;
+    }
+    
+    .ticket-controls {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    
+    .create-ticket {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background-color: white;
+      color: var(--primary-color);
+      border-color: white;
+      font-weight: 600;
+    }
+    
+    .ticket-filter {
+      padding: 0.75rem 1rem;
+      border-radius: 2rem;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      background-color: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
+    
+    .ticket-filter:focus {
+      outline: none;
+      border-color: white;
+    }
+    
+    .ticket-card {
+      background-color: var(--card-background-color, white);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--card-shadow);
+      border-left: 5px solid var(--status-color, var(--primary-color));
+    }
+    
+    .ticket-card.open {
+      --status-color: #43b581;
+    }
+    
+    .ticket-card.closed {
+      --status-color: #f04747;
+    }
+    
+    .ticket-card.pending {
+      --status-color: #faa61a;
+    }
+    
+    .ticket-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .ticket-id {
+      font-family: monospace;
+      background-color: rgba(0, 0, 0, 0.05);
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+    }
+    
+    .ticket-title {
+      margin: 0;
+      font-size: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .status-badge {
+      font-size: 0.8rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 2rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: white;
+    }
+    
+    .status-badge.open {
+      background-color: #43b581;
+    }
+    
+    .status-badge.closed {
+      background-color: #f04747;
+    }
+    
+    .satus-badge.pending {
+      background-color: #faa61a;
+    }
+    
+    .ticket-meta {
+      display: flex;
+      justify-content: space-between;
+      color: var(--accent-color);
+      font-size: 0.9rem;
+      margin-top: 1rem;
+      border-top: 1px solid var(--muted-border-color);
+      padding-top: 1rem;
+    }
+    
+    .ticket-user {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .user-avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+    }
+    
+    .ticket-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .action-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background: none;
+      border: 1px solid var(--muted-border-color);
+      color: var(--text-color);
+      padding: 0;
+      margin: 0;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .action-button:hover {
+      background-color: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      background-color: var(--card-background-color, white);
+      border-radius: 0.75rem;
+      box-shadow: var(--card-shadow);
+    }
+    
+    .empty-state i {
+      font-size: 3rem;
+      color: var(--accent-color);
+      margin-bottom: 1rem;
+    }
+    
+    [data-theme="dark"] {
+      --card-background-color: #2C2F33;
+      --background-color: #23272A;
+    }
+    
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal-content {
+      background-color: var(--card-background-color, white);
+      border-radius: 0.75rem;
+      padding: 2rem;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: var(--card-shadow);
+      position: relative;
+    }
+    
+    .close-modal {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+  </style>
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+    }
+    
+    function openModal(id) {
+      document.getElementById(id).style.display = 'flex';
+    }
+    
+    function closeModal(id) {
+      document.getElementById(id).style.display = 'none';
+    }
+    
+    function filterTickets() {
+      const filter = document.getElementById('ticketFilter').value.toLowerCase();
+      const tickets = document.querySelectorAll('.ticket-card');
+      
+      tickets.forEach(ticket => {
+        const title = ticket.querySelector('.ticket-title').textContent.toLowerCase();
+        const content = ticket.querySelector('.ticket-content').textContent.toLowerCase();
+        
+        if (title.includes(filter) || content.includes(filter)) {
+          ticket.style.display = 'block';
+        } else {
+          ticket.style.display = 'none';
+        }
+      });
+    }
+  </script>
+</head>
+<body>
+<main class="container">
+  <header>
+    <h1>
+      <span class="logo">
+        <img src="/static/cipher.png" alt="Cipher Logo" style="height: 2rem; border-radius: 0.3rem;"> Cipher Dashboard
+      </span>
+    </h1>
+    <button onclick="toggleTheme()" class="theme-toggle">
+      <i class="fas fa-moon"></i> Toggle Theme
+    </button>
+  </header>
+  
+  <a href="/" class="back-button">
+    <i class="fas fa-arrow-left"></i> Back to Dashboard
+  </a>
+  
+  <div class="ticket-header">
+    <h2><i class="fas fa-ticket-alt"></i> Ticket System</h2>
+    <div class="ticket-controls">
+      <input type="text" id="ticketFilter" class="ticket-filter" placeholder="Search tickets..." onkeyup="filterTickets()">
+      <button class="create-ticket" onclick="openModal('createTicketModal')">
+        <i class="fas fa-plus"></i> New Ticket
+      </button>
+    </div>
+  </div>
+  
+  {% if tickets %}
+    {% for ticket in tickets %}
+      <div class="ticket-card {{ ticket.status }}">
+        <div class="ticket-header-row">
+          <h3 class="ticket-title">
+            <span class="ticket-id">#{{ ticket.id }}</span>
+            {{ ticket.title }}
+          </h3>
+          <span class="status-badge {{ ticket.status }}">{{ ticket.status }}</span>
+        </div>
+        
+        <div class="ticket-content">
+          <p>{{ ticket.content }}</p>
+        </div>
+        
+        <div class="ticket-meta">
+          <div class="ticket-user">
+            <img src="{{ ticket.user.avatar_url }}" alt="{{ ticket.user.name }}" class="user-avatar">
+            <span>{{ ticket.user.name }}</span>
+            <span>•</span>
+            <span>{{ ticket.created_at }}</span>
+          </div>
+          
+          <div class="ticket-actions">
+            <button class="action-button" title="View Details" onclick="window.location.href='/tickets/{{ ticket.id }}'">
+              <i class="fas fa-eye"></i>
+            </button>
+            {% if ticket.status != 'closed' %}
+              <button class="action-button" title="Close Ticket">
+                <i class="fas fa-check"></i>
+              </button>
+            {% else %}
+              <button class="action-button" title="Reopen Ticket">
+                <i class="fas fa-redo"></i>
+              </button>
+            {% endif %}
+            <button class="action-button" title="Delete Ticket">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty-state">
+      <i class="fas fa-ticket-alt"></i>
+      <h3>No Tickets Found</h3>
+      <p>You don't have any tickets yet. Create a new ticket to get started.</p>
+      <button onclick="openModal('createTicketModal')" class="contrast">
+        <i class="fas fa-plus"></i> Create Ticket
+      </button>
+    </div>
+  {% endif %}
+  
+  <!-- Create Ticket Modal -->
+  <div id="createTicketModal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" onclick="closeModal('createTicketModal')">&times;</span>
+      <h3>Create New Ticket</h3>
+      <form action="/tickets/create" method="post">
+        <div>
+          <label for="ticketTitle">Title</label>
+          <input type="text" id="ticketTitle" name="title" placeholder="Enter ticket title" required>
+        </div>
+        
+        <div>
+          <label for="ticketCategory">Category</label>
+          <select id="ticketCategory" name="category">
+            <option value="support">Support</option>
+            <option value="bug">Bug Report</option>
+            <option value="feature">Feature Request</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        
+        <div>
+          <label for="ticketContent">Description</label>
+          <textarea id="ticketContent" name="content" placeholder="Describe your issue..." rows="5" required></textarea>
+        </div>
+        
+        <div>
+          <label for="ticketPriority">Priority</label>
+          <select id="ticketPriority" name="priority">
+            <option value="low">Low</option>
+            <option value="medium" selected>Medium</option>
+            <option value="high">High</option>
+            <option value="urgent">Urgent</option>
+          </select>
+        </div>
+        
+        <button type="submit" class="contrast">
+          <i class="fas fa-paper-plane"></i> Submit Ticket
+        </button>
+      </form>
+    </div>
+  </div>
+</main>
+
+<footer style="text-align: center; padding: 2rem 0; margin-top: 3rem; border-top: 1px solid var(--muted-border-color);">
+  <div class="container">
+    <p>&copy; 2025 Cipher Bot. All rights reserved.</p>
+    <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1rem;">
+      <a href="#" aria-label="GitHub" style="color: var(--primary-color);"><i class="fab fa-github"></i></a>
+      <a href="#" aria-label="Discord" style="color: var(--primary-color);"><i class="fab fa-discord"></i></a>
+      <a href="#" aria-label="Twitter" style="color: var(--primary-color);"><i class="fab fa-twitter"></i></a>
+    </div>
+  </div>
+</footer>
+</body>
+</html>
