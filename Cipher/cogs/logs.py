@@ -3,7 +3,7 @@ from discord.ext import commands
 from datetime import datetime
 import os
 
-LOG_CHANNEL_ID = 123456789012345678  # Replace with your logging channel ID
+LOG_CHANNEL_ID = 0000 # TODO: Get config from configmodule.
 LOG_DIR = "storage/logs"
 os.makedirs(LOG_DIR, exist_ok=True)
 
