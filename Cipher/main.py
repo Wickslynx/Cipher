@@ -51,6 +51,7 @@ async def on_ready():
 
 # Load all cogs
 async def load_cogs():
+    await bot.load_extension("cogs.ticket.cog")
     for filename in os.listdir('./cogs'):
         if filename.endswith('.py'):
             await bot.load_extension(f'cogs.{filename[:-3]}')
