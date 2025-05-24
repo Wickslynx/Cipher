@@ -48,12 +48,10 @@ class Ticket(commands.Cog):
 
     @ticket.command(name="add", description="Add a member to this ticket")
     async def ticket_add(self, interaction: discord.Interaction, member: discord.Member):
-    	 """Remove a user from the current ticket channel."""
-	 # Verify this is a ticket channel
 	 if not interaction.channel.name.startswith(("support-", "report-", "appeal-", "paid-ad-")):
 	   	await interaction.response.send_message(
-		    "This command can only be used in a ticket channel.", 
-		    ephemeral=True
+			"This command can only be used in a ticket channel.", 
+			ephemeral=True
 		)
 		return
 		
