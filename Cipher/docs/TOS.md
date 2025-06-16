@@ -9,7 +9,7 @@ By using Cipher, you agree to comply with these Terms of Service. If you do not 
 - The bot's commands and features are subject to change without prior notice.
 
 ## 3. Data Collection and Privacy
-See our [Privacy Policy](privacy_policy.md) for details on what data we collect and how it is used.
+See our [Privacy Policy](https://github.com/Wickslynx/Cipher/blob/main/Cipher/docs/privacy-policy.md) for details on what data we collect and how it is used.
 
 ## 4. Liability
 Cipher is provided "as is" without any guarantees. We are not responsible for any issues caused by its use.
