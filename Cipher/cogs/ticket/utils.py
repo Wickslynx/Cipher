@@ -1,1 +1,1 @@
-# utils.py - reserved for shared logging, embed generation, etc.
+# utils.py - TODO: Embed logging etc should be in this file.
